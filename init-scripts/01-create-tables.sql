@@ -1,0 +1,19 @@
+-- =========================================================
+-- 01-create-tables.sql
+-- Script de criação das tabelas (DDL) do banco de dados
+-- Este arquivo é executado automaticamente pelo container
+-- na primeira inicialização (docker-entrypoint-initdb.d)
+-- =========================================================
+
+-- As tabelas do Esquema Lógico serão criadas aqui,
+-- a partir do mapeamento do Diagrama Conceitual (MERE).
+--
+-- Exemplo de estrutura (substituir pelas tabelas reais do projeto):
+--
+-- CREATE TABLE cliente (
+--     id_cliente INT AUTO_INCREMENT PRIMARY KEY,
+--     nome VARCHAR(100) NOT NULL,
+--     email VARCHAR(150) NOT NULL UNIQUE,
+--     status INT NOT NULL DEFAULT 1, -- 0 = Inativo, 1 = Ativo
+--     data_cadastro DATE NOT NULL
+-- );

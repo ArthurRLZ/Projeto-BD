@@ -1,0 +1,16 @@
+-- =========================================================
+-- 02-insert-data.sql
+-- Script de povoamento (DML) do banco de dados
+-- Este arquivo é executado automaticamente pelo container
+-- logo após o 01-create-tables.sql
+-- =========================================================
+
+-- Inserir aqui os dados de povoamento.
+-- Lembrete dos critérios mínimos da entrega:
+--   - Tabelas principais: mínimo 50 tuplas cada
+--   - Tabelas secundárias: mínimo 15 tuplas cada
+--
+-- Exemplo:
+-- INSERT INTO cliente (nome, email, status, data_cadastro) VALUES
+-- ('Ana Silva', 'ana.silva@email.com', 1, '2024-01-10'),
+-- ('Bruno Souza', 'bruno.souza@email.com', 1, '2024-01-11');
