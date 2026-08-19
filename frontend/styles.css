@@ -1,0 +1,141 @@
+/* Estilo basico do projeto */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 0;
+    color: #333;
+}
+
+.app-container {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* Menu lateral simples */
+.sidebar {
+    width: 200px;
+    background-color: #004080;
+    color: white;
+    padding: 20px;
+}
+
+.sidebar h2 {
+    font-size: 18px;
+    margin-bottom: 30px;
+}
+
+.sidebar a {
+    display: block;
+    color: white;
+    text-decoration: none;
+    margin-bottom: 15px;
+    padding: 10px;
+    background-color: #003366;
+    border-radius: 4px;
+}
+
+.sidebar a:hover {
+    background-color: #00509e;
+}
+
+.sidebar a.active {
+    background-color: #0059b3;
+    font-weight: bold;
+}
+
+.sidebar-footer {
+    margin-top: 50px;
+    font-size: 12px;
+}
+
+/* Conteudo central */
+.main-content {
+    flex-grow: 1;
+    padding: 20px;
+    background-color: white;
+}
+
+.top-header {
+    border-bottom: 2px solid #ccc;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+}
+
+/* Esconde as sessoes que nao estao ativas */
+.view-section {
+    display: none;
+}
+
+.view-section.active {
+    display: block;
+}
+
+/* Tabelas comuns */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+}
+
+table, th, td {
+    border: 1px solid #ccc;
+}
+
+th, td {
+    padding: 10px;
+    text-align: left;
+}
+
+th {
+    background-color: #e0e0e0;
+}
+
+/* Botoes */
+button, .btn {
+    padding: 8px 12px;
+    background-color: #004080;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 3px;
+    margin-right: 5px;
+}
+
+button:hover, .btn:hover {
+    background-color: #0059b3;
+}
+
+form {
+    max-width: 600px;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.form-group input, .form-group select, .form-group textarea {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+}
+
+.badge {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+}
+
+.badge-success { background: green; color: white; }
+.badge-warning { background: orange; color: white; }
+.badge-danger { background: red; color: white; }
+
+.text-gradient {
+    color: #fff;
+}

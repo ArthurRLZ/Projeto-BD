@@ -14,7 +14,7 @@ JOIN USUARIO u ON r.id_solicitante = u.id_usuario
 JOIN RECURSO_RESERVA rr ON r.id_reserva = rr.id_reserva
 JOIN RECURSO rec ON rr.id_recurso = rec.id_recurso;
 
---Visão de Painel de Infratores e Penalidades
+-- Visão de Painel de Infratores e Penalidades
 CREATE OR REPLACE VIEW vw_relatorio_penalidades AS
 SELECT 
     p.id_penalidade,

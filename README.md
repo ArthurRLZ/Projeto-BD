@@ -21,6 +21,12 @@ Este projeto implementa o mapeamento do Diagrama Conceitual (MERE), elaborado na
 | Usuário          | root               |
 | Senha            | root               |
 | Banco de Dados   | ufape_reserva_db   |
+**Portas de Acesso da Aplicação:**
+| Serviço | Porta Exposta | Acesso Localhost |
+|---------|---------------|------------------|
+| Banco de Dados (MySQL) | 3306 | `localhost:3306` |
+| Backend API (FastAPI) | 8000 | `http://localhost:8000/docs` |
+| Frontend SPA (Nginx) | 3000 | `http://localhost:3000` |
 
 ## Como executar o projeto
 

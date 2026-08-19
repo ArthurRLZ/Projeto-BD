@@ -7,6 +7,7 @@ fake = Faker('pt_BR')
 caminho_arquivo = os.path.join('init-scripts', '02-insert-data.sql')
 
 with open(caminho_arquivo, 'w', encoding='utf-8') as f:
+    f.write("SET NAMES utf8mb4;\n")
     f.write("-- Arquivo de Povoamento Gerado Automaticamente (Faker)\n\n")
 
     f.write("-- 1. Povoando DEPARTAMENTO\n")

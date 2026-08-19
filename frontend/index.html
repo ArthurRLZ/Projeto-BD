@@ -3,61 +3,307 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Reservas - UFAPE</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>UFAPE Reserva - Projeto BD</title>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Ícones Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <!-- CSS Customizado -->
+    <link rel="stylesheet" href="styles.css">
 </head>
-<body class="bg-light">
-    <div class="container mt-5">
-        <h2 class="text-center mb-4 text-success">UFAPE - Histórico de Reservas</h2>
-        <div class="card shadow-sm">
-            <div class="card-body">
-                <table class="table table-hover">
-                    <thead class="table-success">
-                        <tr>
-                            <th>Data</th>
-                            <th>Solicitante</th>
-                            <th>Recurso</th>
-                            <th>Finalidade</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tabela-reservas">
-                        <!-- O JavaScript vai injetar os dados aqui -->
-                    </tbody>
-                </table>
+<body>
+
+    <div class="app-container">
+        <!-- Sidebar lateral -->
+        <aside class="sidebar glass-panel">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i class="ph ph-calendar-check logo-icon"></i>
+                    <h2>Reserva<span class="text-gradient">UFAPE</span></h2>
+                </div>
             </div>
-        </div>
+            
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item active" data-target="dashboard">
+                    <i class="ph ph-squares-four"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#" class="nav-item" data-target="reservas">
+                    <i class="ph ph-calendar-plus"></i>
+                    <span>Nova Reserva</span>
+                </a>
+                <a href="#" class="nav-item" data-target="recursos">
+                    <i class="ph ph-projector-screen"></i>
+                    <span>Recursos</span>
+                </a>
+                <a href="#" class="nav-item" data-target="usuarios">
+                    <i class="ph ph-users"></i>
+                    <span>Usuários</span>
+                </a>
+                <a href="#" class="nav-item" data-target="penalidades">
+                    <i class="ph ph-warning-circle"></i>
+                    <span>Penalidades</span>
+                </a>
+                <a href="#" class="nav-item" data-target="aulas">
+                    <i class="ph ph-chalkboard-teacher"></i>
+                    <span>Aulas</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="user-profile">
+                    <img src="https://ui-avatars.com/api/?name=Admin+User&background=3b82f6&color=fff" alt="Avatar" class="avatar">
+                    <div class="user-info">
+                        <strong>Admin User</strong>
+                        <span>admin@ufape.edu.br</span>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Área Principal de Conteúdo -->
+        <main class="main-content">
+            <header class="top-header glass-panel">
+                <div class="header-title">
+                    <h1 id="page-title">Visão Geral</h1>
+                    <p class="subtitle">Acompanhe as reservas e recursos em tempo real</p>
+                </div>
+                <div class="header-actions">
+                    <button class="btn btn-primary" onclick="document.querySelector('[data-target=\'reservas\']').click()">
+                        <i class="ph ph-plus"></i>
+                        Criar Reserva
+                    </button>
+                    <button class="btn btn-icon">
+                        <i class="ph ph-bell"></i>
+                    </button>
+                </div>
+            </header>
+
+            <div class="content-area">
+                <!-- Seção Dashboard (Ativa por padrão) -->
+                <section id="dashboard" class="view-section active">
+                    
+                    <!-- Cards de Resumo (Estáticos para UI Mockup inicial) -->
+                    <div class="stats-grid">
+                        <div class="stat-card glass-panel">
+                            <div class="stat-icon info">
+                                <i class="ph ph-calendar-check"></i>
+                            </div>
+                            <div class="stat-details">
+                                <h3>Total de Reservas</h3>
+                                <p class="value">156</p>
+                            </div>
+                        </div>
+                        <div class="stat-card glass-panel">
+                            <div class="stat-icon success">
+                                <i class="ph ph-check-circle"></i>
+                            </div>
+                            <div class="stat-details">
+                                <h3>Aprovadas</h3>
+                                <p class="value">142</p>
+                            </div>
+                        </div>
+                        <div class="stat-card glass-panel">
+                            <div class="stat-icon warning">
+                                <i class="ph ph-clock"></i>
+                            </div>
+                            <div class="stat-details">
+                                <h3>Pendentes</h3>
+                                <p class="value">14</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tabela de Histórico -->
+                    <div class="data-section glass-panel">
+                        <div class="section-header">
+                            <h2>Histórico de Solicitações</h2>
+                            <div class="filter-group">
+                                <input type="text" placeholder="Buscar reservas..." class="search-input">
+                                <button class="btn btn-outline">Filtrar <i class="ph ph-funnel"></i></button>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Data / Hora</th>
+                                        <th>Solicitante</th>
+                                        <th>Recurso(s)</th>
+                                        <th>Finalidade</th>
+                                        <th>Status</th>
+                                        <th>Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabela-reservas">
+                                    <!-- Skeleton Loader (será substituído via JS) -->
+                                    <tr class="skeleton-row"><td colspan="6"><div class="skeleton"></div></td></tr>
+                                    <tr class="skeleton-row"><td colspan="6"><div class="skeleton"></div></td></tr>
+                                    <tr class="skeleton-row"><td colspan="6"><div class="skeleton"></div></td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- Seção Nova Reserva -->
+                <section id="reservas" class="view-section">
+                    <div class="glass-panel" style="padding: 32px; max-width: 800px; margin: 0 auto;">
+                        <h2 style="margin-bottom: 24px;">Solicitar Nova Reserva</h2>
+                        <form id="form-reserva" onsubmit="enviarReserva(event)">
+                            
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; color: var(--text-secondary);">Data da Reserva</label>
+                                    <input type="date" id="data_reserva" class="search-input" style="width: 100%;" required>
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; color: var(--text-secondary);">Solicitante</label>
+                                    <select id="id_solicitante" class="search-input" style="width: 100%;" required>
+                                        <option value="">Carregando usuários...</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; color: var(--text-secondary);">Hora Início</label>
+                                    <input type="time" id="hora_inicio" class="search-input" style="width: 100%;" required>
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; color: var(--text-secondary);">Hora Fim</label>
+                                    <input type="time" id="hora_fim" class="search-input" style="width: 100%;" required>
+                                </div>
+                            </div>
+
+                            <div style="margin-bottom: 20px;">
+                                <label style="display: block; margin-bottom: 8px; color: var(--text-secondary);">Finalidade</label>
+                                <input type="text" id="finalidade" class="search-input" style="width: 100%;" placeholder="Ex: Aula de Banco de Dados, Defesa de TCC..." required>
+                            </div>
+
+                            <div style="margin-bottom: 20px;">
+                                <label style="display: block; margin-bottom: 8px; color: var(--text-secondary);">Qtd. Participantes</label>
+                                <input type="number" id="qtd_participantes" class="search-input" style="width: 100%;" placeholder="Opcional">
+                            </div>
+
+                            <div style="margin-bottom: 32px;">
+                                <label style="display: block; margin-bottom: 12px; color: var(--text-secondary);">Selecione os Recursos</label>
+                                <div id="lista-recursos-checkbox" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; background: rgba(0,0,0,0.1); padding: 16px; border-radius: var(--radius-sm); border: 1px solid var(--border-color); max-height: 200px; overflow-y: auto;">
+                                    <!-- Preenchido via JS -->
+                                    <span style="color: var(--text-muted)">Carregando recursos...</span>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center; padding: 14px; font-size: 1rem;">Confirmar Solicitação</button>
+                            
+                            <div id="mensagem-alerta" style="margin-top: 20px; padding: 16px; border-radius: 8px; display: none;"></div>
+                        </form>
+                    </div>
+                </section>
+
+                <!-- Seção Gestão de Recursos -->
+                <section id="recursos" class="view-section">
+                    <div class="data-section glass-panel">
+                        <div class="section-header">
+                            <h2>Gestão de Espaços e Equipamentos</h2>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Nome do Recurso</th>
+                                        <th>Status Atual</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabela-gestao-recursos">
+                                    <tr class="skeleton-row"><td colspan="3"><div class="skeleton"></div></td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Seção Gestão de Usuários -->
+                <section id="usuarios" class="view-section">
+                    <div class="data-section glass-panel">
+                        <div class="section-header">
+                            <h2>Usuários Cadastrados</h2>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Nome</th>
+                                        <th>Email</th>
+                                        <th>Perfil</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabela-gestao-usuarios">
+                                    <tr class="skeleton-row"><td colspan="3"><div class="skeleton"></div></td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Seção Penalidades -->
+                <section id="penalidades" class="view-section">
+                    <div class="data-section glass-panel">
+                        <div class="section-header">
+                            <h2>Relatório de Infratores</h2>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Usuário Punido</th>
+                                        <th>Departamento</th>
+                                        <th>Motivo</th>
+                                        <th>Reserva Origem</th>
+                                        <th>Término da Suspensão</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabela-gestao-penalidades">
+                                    <tr class="skeleton-row"><td colspan="5"><div class="skeleton"></div></td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ========================================== -->
+                <!-- SEÇÃO 6: CRONOGRAMA DE AULAS (VIEW 3)      -->
+                <!-- ========================================== -->
+                <section id="aulas" class="view-section">
+                    <div class="data-section glass-panel">
+                        <div class="section-header">
+                            <h2>Cronograma de Aulas</h2>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Data / Hora</th>
+                                        <th>Disciplina</th>
+                                        <th>Professor Responsável</th>
+                                        <th>Semestre</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabela-aulas">
+                                    <tr class="skeleton-row"><td colspan="4"><div class="skeleton"></div></td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+        </main>
     </div>
 
-    <script>
-        // Função para buscar os dados no Backend Python
-        async function carregarReservas() {
-            try {
-                const resposta = await fetch('http://localhost:8000/api/historico-reservas');
-                const reservas = await resposta.json();
-                
-                const tabela = document.getElementById('tabela-reservas');
-                tabela.innerHTML = ''; // Limpa a tabela
-
-                reservas.forEach(reserva => {
-                    const linha = `
-                        <tr>
-                            <td>${reserva.data_reserva}</td>
-                            <td>${reserva.nome_solicitante}</td>
-                            <td>${reserva.nome_recurso}</td>
-                            <td>${reserva.finalidade}</td>
-                            <td><span class="badge ${reserva.status_aprovacao === 'Aprovada' ? 'bg-success' : reserva.status_aprovacao === 'Rejeitada' ? 'bg-danger' : 'bg-warning'}">${reserva.status_aprovacao}</span></td>
-                        </tr>
-                    `;
-                    tabela.innerHTML += linha;
-                });
-            } catch (erro) {
-                console.error("Erro ao carregar reservas:", erro);
-            }
-        }
-
-        // Executa a função ao carregar a página
-        carregarReservas();
-    </script>
+    <script src="app.js"></script>
 </body>
 </html>
