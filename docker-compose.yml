@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   db:
     image: mysql:8.0
@@ -13,6 +11,24 @@ services:
     volumes:
       - ./init-scripts:/docker-entrypoint-initdb.d
       - mysql_data:/var/lib/mysql
+
+  backend:
+    build: ./backend
+    container_name: ufape_backend
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    volumes:
+      - ./backend:/app
+
+  frontend:
+    build: ./frontend
+    container_name: ufape_frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
 
 volumes:
   mysql_data:
