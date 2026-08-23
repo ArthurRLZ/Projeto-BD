@@ -147,11 +147,11 @@ document.addEventListener('DOMContentLoaded', () => {
             penalidades.forEach(pen => {
                 tabela.innerHTML += `
                     <tr>
-                        <td>${pen.nome_usuario}</td>
-                        <td>${pen.departamento_nome}</td>
-                        <td>${pen.motivo_penalidade}</td>
-                        <td>Reserva #${pen.id_reserva}</td>
-                        <td>${window.formatarDataBr(pen.data_fim)}</td>
+                        <td>${pen.usuario_punido}</td>
+                        <td>${pen.departamento}</td>
+                        <td>${pen.motivo}</td>
+                        <td>${pen.reserva_origem}</td>
+                        <td>${window.formatarDataBr(pen.data_fim_suspensao)}</td>
                     </tr>`;
             });
         } catch (erro) {
