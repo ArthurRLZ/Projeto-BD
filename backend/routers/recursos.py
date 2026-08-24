@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from database import get_db_connection
 from schemas import Recurso
+import mysql.connector
 
 router = APIRouter(prefix="/api/recursos", tags=["Recursos"])
 
@@ -30,3 +31,17 @@ def atualizar_recurso(id_recurso: int, rec: Recurso):
         if cursor.rowcount == 0:
             raise HTTPException(status_code=404, detail="Recurso não encontrado")
         return {"mensagem": "Recurso atualizado com sucesso!"}
+
+@router.delete("/{id_recurso}")
+def deletar_recurso(id_recurso: int):
+    try:
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            sql = "DELETE FROM RECURSO WHERE id_recurso = %s"
+            cursor.execute(sql, (id_recurso,))
+            conn.commit()
+            if cursor.rowcount == 0:
+                raise HTTPException(status_code=404, detail="Recurso não encontrado")
+            return {"mensagem": "Recurso deletado com sucesso!"}
+    except mysql.connector.Error as err:
+        raise HTTPException(status_code=400, detail="Não foi possível excluir. Existem reservas ou manutenções vinculadas a este recurso.")

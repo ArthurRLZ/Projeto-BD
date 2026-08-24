@@ -9,6 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
         'reservas': 'Nova Reserva',
         'recursos': 'Gestão de Recursos',
         'usuarios': 'Gestão de Usuários',
+        'disciplinas': 'Gestão de Disciplinas',
         'penalidades': 'Painel de Penalidades',
         'aulas': 'Cronograma de Aulas'
     };
@@ -18,21 +19,22 @@ document.addEventListener('DOMContentLoaded', () => {
     navItems.forEach(item => {
         item.addEventListener('click', (e) => {
             e.preventDefault();
-            
+
             navItems.forEach(nav => nav.classList.remove('active'));
             sections.forEach(sec => sec.classList.remove('active'));
-            
+
             item.classList.add('active');
-            
+
             const targetId = item.getAttribute('data-target');
             document.getElementById(targetId).classList.add('active');
-            
+
             pageTitle.textContent = viewTitles[targetId];
-            
+
             // chama a funcao baseada na aba
             if(targetId === 'dashboard') carregarReservas();
             else if(targetId === 'recursos') carregarRecursos();
             else if(targetId === 'usuarios') carregarUsuarios();
+            else if(targetId === 'disciplinas') carregarDisciplinas();
             else if(targetId === 'penalidades') carregarPenalidades();
             else if(targetId === 'aulas') carregarAulas();
             else if(targetId === 'reservas') carregarOpcoesNovaReserva();
@@ -54,7 +56,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if(!resposta.ok) throw new Error('Erro na API');
             const reservas = await resposta.json();
             tabela.innerHTML = '';
-            
+
             if (reservas.length === 0) {
                 tabela.innerHTML = `<tr><td colspan="6" style="text-align:center;">Nenhuma reserva encontrada.</td></tr>`;
                 return;
@@ -93,12 +95,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // carrega os recursos disponiveis
-    async function carregarRecursos() {
+    window.carregarRecursos = async function () {
         const tabela = document.getElementById('tabela-gestao-recursos');
         try {
             const resposta = await fetch(`${getBaseUrl()}/recursos`);
             const recursos = await resposta.json();
             tabela.innerHTML = '';
+            if (recursos.length === 0) {
+                tabela.innerHTML = `<tr><td colspan="4" style="text-align:center;">Nenhum recurso cadastrado.</td></tr>`;
+                return;
+            }
             recursos.forEach(rec => {
                 let badgeClass = rec.status_atual === 'Disponível' ? 'badge-success' : 'badge-danger';
                 tabela.innerHTML += `
@@ -106,32 +112,200 @@ document.addEventListener('DOMContentLoaded', () => {
                         <td>#${rec.id_recurso}</td>
                         <td>${rec.nome}</td>
                         <td><span class="badge ${badgeClass}">${rec.status_atual}</span></td>
+                        <td>
+                            <button class="btn btn-icon" title="Editar" onclick='abrirModal("recurso", ${JSON.stringify(rec)})'><i class="ph ph-pencil-simple"></i></button>
+                            <button class="btn btn-icon btn-danger" title="Excluir" onclick="excluirItem('recurso', ${rec.id_recurso})"><i class="ph ph-trash"></i></button>
+                        </td>
                     </tr>`;
             });
         } catch (erro) {
-            tabela.innerHTML = `<tr><td colspan="3">Erro ao carregar recursos.</td></tr>`;
+            tabela.innerHTML = `<tr><td colspan="4">Erro ao carregar recursos.</td></tr>`;
         }
     }
 
     // busca a lista de usuarios
-    async function carregarUsuarios() {
+    window.carregarUsuarios = async function () {
         const tabela = document.getElementById('tabela-gestao-usuarios');
         try {
             const resposta = await fetch(`${getBaseUrl()}/usuarios`);
             const usuarios = await resposta.json();
             tabela.innerHTML = '';
+            if (usuarios.length === 0) {
+                tabela.innerHTML = `<tr><td colspan="4" style="text-align:center;">Nenhum usuário cadastrado.</td></tr>`;
+                return;
+            }
             usuarios.forEach(usr => {
                 tabela.innerHTML += `
                     <tr>
                         <td>${usr.primeiro_nome} ${usr.sobrenome}</td>
                         <td>${usr.email}</td>
                         <td>${usr.tipo_perfil}</td>
+                        <td>
+                            <button class="btn btn-icon" title="Editar" onclick='abrirModal("usuario", ${JSON.stringify(usr)})'><i class="ph ph-pencil-simple"></i></button>
+                            <button class="btn btn-icon btn-danger" title="Excluir" onclick="excluirItem('usuario', ${usr.id_usuario})"><i class="ph ph-trash"></i></button>
+                        </td>
                     </tr>`;
             });
         } catch (erro) {
-            tabela.innerHTML = `<tr><td colspan="3">Erro ao carregar usuários.</td></tr>`;
+            tabela.innerHTML = `<tr><td colspan="4">Erro ao carregar usuários.</td></tr>`;
         }
     }
+
+    // busca a lista de disciplinas
+    window.carregarDisciplinas = async function () {
+        const tabela = document.getElementById('tabela-gestao-disciplinas');
+        try {
+            const resposta = await fetch(`${getBaseUrl()}/disciplinas`);
+            const disciplinas = await resposta.json();
+            tabela.innerHTML = '';
+            if (disciplinas.length === 0) {
+                tabela.innerHTML = `<tr><td colspan="4" style="text-align:center;">Nenhuma disciplina cadastrada.</td></tr>`;
+                return;
+            }
+            disciplinas.forEach(disc => {
+                tabela.innerHTML += `
+                    <tr>
+                        <td>${disc.codigo_oficial}</td>
+                        <td>${disc.nome}</td>
+                        <td>${disc.id_departamento}</td>
+                        <td>
+                            <button class="btn btn-icon" title="Editar" onclick='abrirModal("disciplina", ${JSON.stringify(disc)})'><i class="ph ph-pencil-simple"></i></button>
+                            <button class="btn btn-icon btn-danger" title="Excluir" onclick="excluirItem('disciplina', ${disc.id_disciplina})"><i class="ph ph-trash"></i></button>
+                        </td>
+                    </tr>`;
+            });
+        } catch (erro) {
+            tabela.innerHTML = `<tr><td colspan="4">Erro ao carregar disciplinas.</td></tr>`;
+        }
+    }
+
+    // ================== MODAL GENÉRICO DE CRIAR/EDITAR ==================
+
+    // define os campos de formulario para cada tipo de entidade
+    const configEntidades = {
+        recurso: {
+            titulo: 'Recurso',
+            endpoint: 'recursos',
+            idField: 'id_recurso',
+            campos: [
+                { name: 'nome', label: 'Nome', type: 'text' },
+                { name: 'status_atual', label: 'Status Atual', type: 'select', options: ['Disponível', 'Reservado', 'Em Manutenção', 'Inativo'] }
+            ]
+        },
+        usuario: {
+            titulo: 'Usuário',
+            endpoint: 'usuarios',
+            idField: 'id_usuario',
+            campos: [
+                { name: 'primeiro_nome', label: 'Primeiro Nome', type: 'text' },
+                { name: 'sobrenome', label: 'Sobrenome', type: 'text' },
+                { name: 'email', label: 'Email', type: 'text' },
+                { name: 'tipo_perfil', label: 'Perfil', type: 'select', options: ['Aluno', 'Professor', 'Técnico', 'Admin'] },
+                { name: 'id_departamento', label: 'ID do Departamento', type: 'number' }
+            ]
+        },
+        disciplina: {
+            titulo: 'Disciplina',
+            endpoint: 'disciplinas',
+            idField: 'id_disciplina',
+            campos: [
+                { name: 'codigo_oficial', label: 'Código Oficial', type: 'text' },
+                { name: 'nome', label: 'Nome', type: 'text' },
+                { name: 'id_departamento', label: 'ID do Departamento', type: 'number' }
+            ]
+        }
+    };
+
+    let modalTipoAtual = null;
+    let modalIdAtual = null;
+
+    // abre o modal, em modo criacao (sem 'item') ou edicao (com 'item')
+    window.abrirModal = function (tipo, item) {
+        const config = configEntidades[tipo];
+        modalTipoAtual = tipo;
+        modalIdAtual = item ? item[config.idField] : null;
+
+        document.getElementById('modal-titulo').textContent = (item ? 'Editar ' : 'Novo(a) ') + config.titulo;
+
+        const camposHtml = config.campos.map(campo => {
+            const valorAtual = item ? (item[campo.name] ?? '') : '';
+            if (campo.type === 'select') {
+                const opcoes = campo.options.map(op =>
+                    `<option value="${op}" ${op === valorAtual ? 'selected' : ''}>${op}</option>`
+                ).join('');
+                return `
+                    <div class="form-group">
+                        <label>${campo.label}</label>
+                        <select id="modal-campo-${campo.name}">${opcoes}</select>
+                    </div>`;
+            }
+            return `
+                <div class="form-group">
+                    <label>${campo.label}</label>
+                    <input type="${campo.type}" id="modal-campo-${campo.name}" value="${valorAtual}">
+                </div>`;
+        }).join('');
+
+        document.getElementById('modal-campos').innerHTML = camposHtml;
+        document.getElementById('modal-overlay').classList.add('active');
+    };
+
+    window.fecharModal = function () {
+        document.getElementById('modal-overlay').classList.remove('active');
+        modalTipoAtual = null;
+        modalIdAtual = null;
+    };
+
+    // le os campos do form, monta o payload e salva (create ou update)
+    window.salvarModal = async function () {
+        const config = configEntidades[modalTipoAtual];
+        const payload = {};
+        config.campos.forEach(campo => {
+            let valor = document.getElementById(`modal-campo-${campo.name}`).value;
+            if (campo.type === 'number') valor = parseInt(valor) || null;
+            payload[campo.name] = valor;
+        });
+
+        const editando = !!modalIdAtual;
+        const url = editando
+            ? `${getBaseUrl()}/${config.endpoint}/${modalIdAtual}`
+            : `${getBaseUrl()}/${config.endpoint}/`;
+
+        try {
+            const resposta = await fetch(url, {
+                method: editando ? 'PUT' : 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const dados = await resposta.json();
+            if (!resposta.ok) throw new Error(dados.detail || 'Erro ao salvar.');
+
+            fecharModal();
+            if (modalTipoAtual === 'recurso') carregarRecursos();
+            else if (modalTipoAtual === 'usuario') carregarUsuarios();
+            else if (modalTipoAtual === 'disciplina') carregarDisciplinas();
+        } catch (erro) {
+            alert(erro.message);
+        }
+    };
+
+    // exclui um registro de qualquer uma das 3 entidades
+    window.excluirItem = async function (tipo, id) {
+        const config = configEntidades[tipo];
+        if (!confirm(`Tem certeza que deseja excluir este(a) ${config.titulo.toLowerCase()}?`)) return;
+
+        try {
+            const resposta = await fetch(`${getBaseUrl()}/${config.endpoint}/${id}`, { method: 'DELETE' });
+            const dados = await resposta.json();
+            if (!resposta.ok) throw new Error(dados.detail || 'Erro ao excluir.');
+
+            if (tipo === 'recurso') carregarRecursos();
+            else if (tipo === 'usuario') carregarUsuarios();
+            else if (tipo === 'disciplina') carregarDisciplinas();
+        } catch (erro) {
+            alert(erro.message);
+        }
+    };
 
     // puxa relatorio penalidades
     async function carregarPenalidades() {
@@ -225,7 +399,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     window.enviarReserva = async function(event) {
         event.preventDefault();
-        
+
         const alerta = document.getElementById('mensagem-alerta');
         alerta.style.display = 'none';
 
@@ -272,7 +446,7 @@ document.addEventListener('DOMContentLoaded', () => {
             alerta.style.color = '#10b981';
             alerta.innerHTML = `✅ ${dados.mensagem} (ID: #${dados.id_reserva})`;
             document.getElementById('form-reserva').reset();
-            
+
         } catch(erro) {
             // Erro (Ex: Conflito de horário)
             alerta.style.display = 'block';
@@ -285,7 +459,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // funcoes crud
     window.atualizarStatusReserva = async function(id_reserva, status) {
         if(!confirm(`Deseja realmente marcar a reserva #${id_reserva} como ${status}?`)) return;
-        
+
         try {
             const resposta = await fetch(`${getBaseUrl()}/reservas/${id_reserva}/aprovar`, {
                 method: 'PUT',
@@ -306,7 +480,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     window.deletarReserva = async function(id_reserva) {
         if(!confirm(`⚠️ Tem certeza que deseja excluir a reserva #${id_reserva} do banco de dados?\nEsta ação não pode ser desfeita.`)) return;
-        
+
         try {
             const resposta = await fetch(`${getBaseUrl()}/reservas/${id_reserva}`, {
                 method: 'DELETE'

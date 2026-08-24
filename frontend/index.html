@@ -42,6 +42,10 @@
                     <i class="ph ph-users"></i>
                     <span>Usuários</span>
                 </a>
+                <a href="#" class="nav-item" data-target="disciplinas">
+                    <i class="ph ph-book-open"></i>
+                    <span>Disciplinas</span>
+                </a>
                 <a href="#" class="nav-item" data-target="penalidades">
                     <i class="ph ph-warning-circle"></i>
                     <span>Penalidades</span>
@@ -208,6 +212,7 @@
                     <div class="data-section glass-panel">
                         <div class="section-header">
                             <h2>Gestão de Espaços e Equipamentos</h2>
+                            <button class="btn btn-primary" onclick="abrirModal('recurso')">+ Novo Recurso</button>
                         </div>
                         <div class="table-responsive">
                             <table class="data-table">
@@ -216,10 +221,11 @@
                                         <th>ID</th>
                                         <th>Nome do Recurso</th>
                                         <th>Status Atual</th>
+                                        <th>Ações</th>
                                     </tr>
                                 </thead>
                                 <tbody id="tabela-gestao-recursos">
-                                    <tr class="skeleton-row"><td colspan="3"><div class="skeleton"></div></td></tr>
+                                    <tr class="skeleton-row"><td colspan="4"><div class="skeleton"></div></td></tr>
                                 </tbody>
                             </table>
                         </div>
@@ -231,6 +237,7 @@
                     <div class="data-section glass-panel">
                         <div class="section-header">
                             <h2>Usuários Cadastrados</h2>
+                            <button class="btn btn-primary" onclick="abrirModal('usuario')">+ Novo Usuário</button>
                         </div>
                         <div class="table-responsive">
                             <table class="data-table">
@@ -239,10 +246,36 @@
                                         <th>Nome</th>
                                         <th>Email</th>
                                         <th>Perfil</th>
+                                        <th>Ações</th>
                                     </tr>
                                 </thead>
                                 <tbody id="tabela-gestao-usuarios">
-                                    <tr class="skeleton-row"><td colspan="3"><div class="skeleton"></div></td></tr>
+                                    <tr class="skeleton-row"><td colspan="4"><div class="skeleton"></div></td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Seção Gestão de Disciplinas -->
+                <section id="disciplinas" class="view-section">
+                    <div class="data-section glass-panel">
+                        <div class="section-header">
+                            <h2>Disciplinas Cadastradas</h2>
+                            <button class="btn btn-primary" onclick="abrirModal('disciplina')">+ Nova Disciplina</button>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Código</th>
+                                        <th>Nome</th>
+                                        <th>Departamento (ID)</th>
+                                        <th>Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabela-gestao-disciplinas">
+                                    <tr class="skeleton-row"><td colspan="4"><div class="skeleton"></div></td></tr>
                                 </tbody>
                             </table>
                         </div>
@@ -302,6 +335,18 @@
 
             </div>
         </main>
+    </div>
+
+    <!-- Modal genérico de Criar/Editar (Recursos, Usuários, Disciplinas) -->
+    <div id="modal-overlay" class="modal-overlay">
+        <div class="modal-box">
+            <h3 id="modal-titulo">Editar</h3>
+            <div id="modal-campos"></div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="fecharModal()">Cancelar</button>
+                <button class="btn btn-primary" onclick="salvarModal()">Salvar</button>
+            </div>
+        </div>
     </div>
 
     <script src="app.js"></script>
