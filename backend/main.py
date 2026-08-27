@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import mysql.connector
 
 # Importando os roteadores
-from routers import departamentos, usuarios, views, reservas, recursos, disciplinas
+from routers import departamentos, usuarios, views, reservas, recursos, disciplinas, relatorios
 
 app = FastAPI(
     title="API Reserva UFAPE", 
@@ -38,6 +38,7 @@ app.include_router(recursos.router)
 app.include_router(disciplinas.router)
 app.include_router(reservas.router)
 app.include_router(views.router)
+app.include_router(relatorios.router)
 
 @app.get("/", tags=["Healthcheck"])
 def root():

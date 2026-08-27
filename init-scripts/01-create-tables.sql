@@ -129,3 +129,15 @@ CREATE TABLE PENALIDADE (
     FOREIGN KEY (id_usuario) REFERENCES USUARIO(id_usuario),
     FOREIGN KEY (id_reserva) REFERENCES RESERVA(id_reserva)
 );
+
+-- 13. Criação da tabela HISTORICO_STATUS_RESERVA (Auditoria, populada via gatilho)
+CREATE TABLE HISTORICO_STATUS_RESERVA (
+    id_historico INT AUTO_INCREMENT PRIMARY KEY,
+    id_reserva INT NOT NULL,
+    status_anterior VARCHAR(30),
+    status_novo VARCHAR(30) NOT NULL,
+    data_alteracao DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    id_aprovador INT,
+    FOREIGN KEY (id_reserva) REFERENCES RESERVA(id_reserva),
+    FOREIGN KEY (id_aprovador) REFERENCES USUARIO(id_usuario)
+);

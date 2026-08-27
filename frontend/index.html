@@ -54,6 +54,10 @@
                     <i class="ph ph-chalkboard-teacher"></i>
                     <span>Aulas</span>
                 </a>
+                <a href="#" class="nav-item" data-target="relatorios">
+                    <i class="ph ph-chart-bar"></i>
+                    <span>Relatórios</span>
+                </a>
             </nav>
 
             <div class="sidebar-footer">
@@ -327,6 +331,106 @@
                                 </thead>
                                 <tbody id="tabela-aulas">
                                     <tr class="skeleton-row"><td colspan="4"><div class="skeleton"></div></td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ========================================== -->
+                <!-- SEÇÃO: GERADOR DE RELATÓRIOS               -->
+                <!-- ========================================== -->
+                <section id="relatorios" class="view-section">
+
+                    <div class="stats-grid" id="stats-relatorios">
+                        <div class="stat-card glass-panel">
+                            <div class="stat-icon success"><i class="ph ph-check-circle"></i></div>
+                            <div class="stat-details">
+                                <h3>Aprovadas</h3>
+                                <p class="value" id="stat-aprovadas">-</p>
+                            </div>
+                        </div>
+                        <div class="stat-card glass-panel">
+                            <div class="stat-icon warning"><i class="ph ph-clock"></i></div>
+                            <div class="stat-details">
+                                <h3>Pendentes</h3>
+                                <p class="value" id="stat-pendentes">-</p>
+                            </div>
+                        </div>
+                        <div class="stat-card glass-panel">
+                            <div class="stat-icon danger"><i class="ph ph-x-circle"></i></div>
+                            <div class="stat-details">
+                                <h3>Rejeitadas</h3>
+                                <p class="value" id="stat-rejeitadas">-</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="data-section glass-panel">
+                        <div class="section-header">
+                            <h2>Ranking de Uso dos Recursos</h2>
+                            <button class="btn btn-outline" onclick="window.exportarRelatorioCSV('uso-recursos')">Exportar CSV <i class="ph ph-download-simple"></i></button>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Recurso</th>
+                                        <th>Status Atual</th>
+                                        <th>Total de Reservas</th>
+                                        <th>Aprovadas</th>
+                                        <th>Horas Reservadas</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabela-uso-recursos">
+                                    <tr class="skeleton-row"><td colspan="5"><div class="skeleton"></div></td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="data-section glass-panel">
+                        <div class="section-header">
+                            <h2>Ocupação por Departamento</h2>
+                            <button class="btn btn-outline" onclick="window.exportarRelatorioCSV('ocupacao-departamentos')">Exportar CSV <i class="ph ph-download-simple"></i></button>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Departamento</th>
+                                        <th>Total de Reservas</th>
+                                        <th>Aprovadas</th>
+                                        <th>Pendentes</th>
+                                        <th>Rejeitadas</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabela-ocupacao-departamentos">
+                                    <tr class="skeleton-row"><td colspan="5"><div class="skeleton"></div></td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="data-section glass-panel">
+                        <div class="section-header">
+                            <h2>Auditoria de Alterações de Reservas <span style="font-weight:400; font-size:0.8rem; color:var(--text-muted);">(evidência do gatilho)</span></h2>
+                            <button class="btn btn-outline" onclick="window.exportarRelatorioCSV('auditoria-status')">Exportar CSV <i class="ph ph-download-simple"></i></button>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Reserva</th>
+                                        <th>Solicitante</th>
+                                        <th>Status Anterior</th>
+                                        <th>Status Novo</th>
+                                        <th>Alterado Por</th>
+                                        <th>Data/Hora</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabela-auditoria-status">
+                                    <tr class="skeleton-row"><td colspan="6"><div class="skeleton"></div></td></tr>
                                 </tbody>
                             </table>
                         </div>
