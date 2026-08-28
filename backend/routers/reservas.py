@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
 from database import get_db_connection
-from schemas import ReservaCreate, ReservaAprovar
+from schemas import ReservaCreate, ReservaAprovar, DevolucaoRecurso
 import mysql.connector
 
 router = APIRouter(prefix="/api/reservas", tags=["Reservas"])
@@ -121,3 +121,25 @@ def deletar_reserva(id_reserva: int):
         except mysql.connector.Error as err:
             conn.rollback()
             raise HTTPException(status_code=400, detail=f"Erro ao excluir. Pode existir dependências (ex: Penalidades). {err}")
+
+@router.put("/{id_reserva}/recursos/{id_recurso}/devolucao")
+def registrar_devolucao(id_reserva: int, id_recurso: int, dados: DevolucaoRecurso):
+    """Registra a devolução de um recurso vinculado a uma reserva.
+    O gatilho trg_recurso_disponivel_ao_devolver libera automaticamente o
+    recurso (status_atual = 'Disponível') no banco de dados."""
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        sql = """
+            UPDATE RECURSO_RESERVA
+            SET data_hora_retirada = COALESCE(data_hora_retirada, NOW()),
+                data_hora_devolucao = NOW(),
+                observacao_avaria = %s
+            WHERE id_reserva = %s AND id_recurso = %s
+        """
+        cursor.execute(sql, (dados.observacao_avaria, id_reserva, id_recurso))
+        conn.commit()
+
+        if cursor.rowcount == 0:
+            raise HTTPException(status_code=404, detail="Vínculo entre reserva e recurso não encontrado.")
+
+        return {"mensagem": "Devolução registrada com sucesso! O recurso foi liberado automaticamente pelo gatilho do banco de dados."}

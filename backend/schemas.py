@@ -38,3 +38,6 @@ class ReservaAprovar(BaseModel):
     status_aprovacao: str # 'Aprovada' ou 'Rejeitada'
     justificativa_analise: Optional[str] = None
     id_aprovador: int
+
+class DevolucaoRecurso(BaseModel):
+    observacao_avaria: Optional[str] = None

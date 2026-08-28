@@ -11,7 +11,8 @@ document.addEventListener('DOMContentLoaded', () => {
         'usuarios': 'Gestão de Usuários',
         'disciplinas': 'Gestão de Disciplinas',
         'penalidades': 'Painel de Penalidades',
-        'aulas': 'Cronograma de Aulas'
+        'aulas': 'Cronograma de Aulas',
+        'relatorios': 'Gerador de Relatórios'
     };
 
     const getBaseUrl = () => window.location.hostname === 'localhost' ? 'http://localhost:8000/api' : '/api';
@@ -38,6 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
             else if(targetId === 'penalidades') carregarPenalidades();
             else if(targetId === 'aulas') carregarAulas();
             else if(targetId === 'reservas') carregarOpcoesNovaReserva();
+            else if(targetId === 'relatorios') carregarRelatorios();
         });
     });
 
@@ -72,6 +74,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     acoes = `
                         <button class="btn btn-icon" title="Aprovar" style="color:var(--success)" onclick="atualizarStatusReserva(${reserva.id_reserva}, 'Aprovada')"><i class="ph ph-check-circle"></i></button>
                         <button class="btn btn-icon" title="Rejeitar" style="color:var(--danger)" onclick="atualizarStatusReserva(${reserva.id_reserva}, 'Rejeitada')"><i class="ph ph-x-circle"></i></button>
+                    `;
+                } else if(reserva.status_aprovacao === 'Aprovada' && !reserva.data_hora_devolucao) {
+                    acoes = `
+                        <button class="btn btn-icon" title="Registrar Devolução" style="color:var(--info)" onclick="registrarDevolucao(${reserva.id_reserva}, ${reserva.id_recurso})"><i class="ph ph-arrow-u-down-left"></i></button>
                     `;
                 }
                 acoes += `<button class="btn btn-icon" title="Excluir" style="color:var(--danger)" onclick="deletarReserva(${reserva.id_reserva})"><i class="ph ph-trash"></i></button>`;
@@ -491,6 +497,157 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch(erro) {
             alert(erro.message);
         }
+    };
+
+    // registra a devolução de um recurso (aciona o gatilho trg_recurso_disponivel_ao_devolver)
+    window.registrarDevolucao = async function(id_reserva, id_recurso) {
+        if(!confirm(`Confirmar a devolução do recurso da reserva #${id_reserva}?\nO recurso será liberado automaticamente pelo gatilho do banco de dados.`)) return;
+
+        try {
+            const resposta = await fetch(`${getBaseUrl()}/reservas/${id_reserva}/recursos/${id_recurso}/devolucao`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ observacao_avaria: null })
+            });
+            const dados = await resposta.json();
+            if(!resposta.ok) throw new Error(dados.detail || 'Erro ao registrar devolução.');
+            alert(dados.mensagem);
+            carregarReservas();
+        } catch(erro) {
+            alert(erro.message);
+        }
+    };
+
+    // ================== GERADOR DE RELATÓRIOS ==================
+
+    // guarda em cache o último resultado de cada relatório para permitir exportação em CSV
+    const cacheRelatorios = {};
+
+    async function carregarRelatorios() {
+        await Promise.all([
+            carregarResumoStatus(),
+            carregarUsoRecursos(),
+            carregarOcupacaoDepartamentos(),
+            carregarAuditoriaStatus()
+        ]);
+    }
+
+    async function carregarResumoStatus() {
+        try {
+            const resposta = await fetch(`${getBaseUrl()}/relatorios/resumo-status`);
+            const dados = await resposta.json();
+            const totais = { 'Aprovada': 0, 'Pendente': 0, 'Rejeitada': 0 };
+            dados.forEach(item => { totais[item.status_aprovacao] = item.total; });
+            document.getElementById('stat-aprovadas').textContent = totais['Aprovada'];
+            document.getElementById('stat-pendentes').textContent = totais['Pendente'];
+            document.getElementById('stat-rejeitadas').textContent = totais['Rejeitada'];
+        } catch (erro) {
+            console.error('Erro ao carregar resumo de status:', erro);
+        }
+    }
+
+    async function carregarUsoRecursos() {
+        const tabela = document.getElementById('tabela-uso-recursos');
+        try {
+            const resposta = await fetch(`${getBaseUrl()}/relatorios/uso-recursos`);
+            const dados = await resposta.json();
+            cacheRelatorios['uso-recursos'] = dados;
+            tabela.innerHTML = '';
+            if (dados.length === 0) {
+                tabela.innerHTML = `<tr><td colspan="5" style="text-align:center;">Nenhum dado disponível.</td></tr>`;
+                return;
+            }
+            dados.forEach(item => {
+                const badgeClass = item.status_atual === 'Disponível' ? 'badge-success' : 'badge-danger';
+                tabela.innerHTML += `
+                    <tr>
+                        <td>${item.nome_recurso}</td>
+                        <td><span class="badge ${badgeClass}">${item.status_atual}</span></td>
+                        <td>${item.total_reservas}</td>
+                        <td>${item.total_aprovadas}</td>
+                        <td>${item.total_horas_reservadas ?? 0}h</td>
+                    </tr>`;
+            });
+        } catch (erro) {
+            tabela.innerHTML = `<tr><td colspan="5" style="color:var(--danger); text-align:center;">Erro ao carregar relatório.</td></tr>`;
+        }
+    }
+
+    async function carregarOcupacaoDepartamentos() {
+        const tabela = document.getElementById('tabela-ocupacao-departamentos');
+        try {
+            const resposta = await fetch(`${getBaseUrl()}/relatorios/ocupacao-departamentos`);
+            const dados = await resposta.json();
+            cacheRelatorios['ocupacao-departamentos'] = dados;
+            tabela.innerHTML = '';
+            if (dados.length === 0) {
+                tabela.innerHTML = `<tr><td colspan="5" style="text-align:center;">Nenhum dado disponível.</td></tr>`;
+                return;
+            }
+            dados.forEach(item => {
+                tabela.innerHTML += `
+                    <tr>
+                        <td>${item.nome_departamento} (${item.sigla})</td>
+                        <td>${item.total_reservas}</td>
+                        <td>${item.total_aprovadas}</td>
+                        <td>${item.total_pendentes}</td>
+                        <td>${item.total_rejeitadas}</td>
+                    </tr>`;
+            });
+        } catch (erro) {
+            tabela.innerHTML = `<tr><td colspan="5" style="color:var(--danger); text-align:center;">Erro ao carregar relatório.</td></tr>`;
+        }
+    }
+
+    async function carregarAuditoriaStatus() {
+        const tabela = document.getElementById('tabela-auditoria-status');
+        try {
+            const resposta = await fetch(`${getBaseUrl()}/relatorios/auditoria-status`);
+            const dados = await resposta.json();
+            cacheRelatorios['auditoria-status'] = dados;
+            tabela.innerHTML = '';
+            if (dados.length === 0) {
+                tabela.innerHTML = `<tr><td colspan="6" style="text-align:center;">Nenhuma alteração registrada ainda. Aprove ou rejeite uma reserva para gerar um registro de auditoria.</td></tr>`;
+                return;
+            }
+            dados.forEach(item => {
+                tabela.innerHTML += `
+                    <tr>
+                        <td>#${item.id_reserva}</td>
+                        <td>${item.solicitante}</td>
+                        <td>${item.status_anterior ?? '-'}</td>
+                        <td>${item.status_novo}</td>
+                        <td>${item.alterado_por ?? '-'}</td>
+                        <td>${new Date(item.data_alteracao).toLocaleString('pt-BR')}</td>
+                    </tr>`;
+            });
+        } catch (erro) {
+            tabela.innerHTML = `<tr><td colspan="6" style="color:var(--danger); text-align:center;">Erro ao carregar relatório.</td></tr>`;
+        }
+    }
+
+    // converte o resultado em cache do relatório para CSV e dispara o download
+    window.exportarRelatorioCSV = function (chave) {
+        const dados = cacheRelatorios[chave];
+        if (!dados || dados.length === 0) {
+            alert('Não há dados para exportar.');
+            return;
+        }
+        const colunas = Object.keys(dados[0]);
+        const linhas = [colunas.join(';')];
+        dados.forEach(item => {
+            linhas.push(colunas.map(col => `"${String(item[col] ?? '').replace(/"/g, '""')}"`).join(';'));
+        });
+        const csv = linhas.join('\n');
+        const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `relatorio-${chave}-${new Date().toISOString().slice(0, 10)}.csv`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
     };
 
     // Inicia carregando o dashboard
